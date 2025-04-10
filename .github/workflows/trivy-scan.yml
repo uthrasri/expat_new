@@ -1,0 +1,30 @@
+name: Trivy CVE Scan
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests to the main branch
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest  # The virtual machine runner for your job
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2  # Checkout the repository code
+
+    - name: Install Trivy
+      run: |
+        curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.22.0/trivy_0.22.0_Linux-x86_64.tar.gz | tar xz -C /usr/local/bin
+
+    - name: Run Trivy scan
+      run: trivy fs . --format json --output trivy-results.json  # Run the scan and output results in JSON format
+
+    - name: Upload Trivy results as an artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: trivy-results
+        path: trivy-results.json  # Upload the scan results as an artifact
